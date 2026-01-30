@@ -1,0 +1,63 @@
+S. No.,CourseID,CourseName,Year,Semester,Branch,Type,BasketID
+3_M1_1,CS307,Machine Learning,3,6,CSE,Main,
+3_M2_1,EC307,Wireless Communication,3,6,ECE,Main,
+3_M3_1,DS308,Data Security and Privacy,3,6,DSAI,Main,
+,,,,,,,
+3_B1_1,EC456,Reinforcement Learning,3,6,ALL,Elective,B1
+3_B1_2,CS371,GPU Computing,3,6,ALL,Elective,B1
+3_B1_3,CS370,Remote Sensing and Applications,3,6,ALL,Elective,B1
+3_B1_4,CS369,Software Design and Architecture,3,6,ALL,Elective,B1
+3_B1_5,CS368,Computer Architecture for AI Systems,3,6,ALL,Elective,B1
+3_B1_6,EC363,CMOS RF Circuit Design,3,6,ALL,Elective,B1
+3_B1_7,DA351,Explainable AI,3,6,ALL,Elective,B1
+,,,,,,,
+3_B2_1,CS469,Virtualisation and Cloud Computing,3,6,ALL,Elective,B2
+3_B2_2,CS372,Biometric Security and Forensics,3,6,ALL,Elective,B2
+3_B2_3,CS472,Bioinformatics,3,6,ALL,Elective,B2
+3_B2_4,CS464,Deep Learning for Computer Vision,3,6,ALL,Elective,B2
+3_B2_5,EC366,Device-Circuit Co-Design,3,6,ALL,Elective,B2
+,,,,,,,
+3_B3_1,CS205,Graph Theory,3,6,ALL,Elective,B3
+3_B3_2,CS455,Blockchain Technology,3,6,ALL,Elective,B3
+3_B3_3,CS458,Natural Language Processing,3,6,ALL,Elective,B3
+3_B3_4,CS367,Industrial IoT,3,6,ALL,Elective,B3
+,,,,,,,
+3_B4_1,ASD351,Design Thinking and Innovation,3,6,ALL,Elective,B4
+3_B4_2,DA352,Full Stack Development II,3,6,ALL,Elective,B4
+3_B4_3,EC361,Introduction to 5G,3,6,ALL,Elective,B4
+,,,,,,,
+3_B5_1,ASD353+ASD354,Quantum Hardware and Systems + Quantum Hardware Physics,3,6,ALL,Elective,B5
+3_B5_2,DA353,Cloud Computing and AI Services,3,6,ALL,Elective,B5
+3_B5_3,CS373,DevSecOps,3,6,ALL,Elective,B5
+3_B5_4,DS357,Large Language Model,3,6,ALL,Elective,B5
+3_B5_5,DA355,Mathematics for Modern Applications,3,6,ALL,Elective,B5
+3_B5_6,DS351,Statistics for Health Technology,3,6,ALL,Elective,B5
+3_B5_7,DS452,Advanced Optimization Techniques,3,6,ALL,Elective,B5
+3_B5_8,DS358,Deep Speech Processing,3,6,ALL,Elective,B5
+3_B5_9,DA354,Federated Learning,3,6,ALL,Elective,B5
+,,,,,,,
+,,,,,,,
+2_M1_1,CS265,Software Engineering,2,4,CSE,Main,
+2_M1_2,CS266,DBMS,2,4,CSE,Main,
+2_M1_3,CS304,ARTIFICIAL Intelligence,2,4,CSE,Main,
+2_M1_4,CS267,Systems and Usable securitty,2,4,CSE,Main,
+2_M1_5,CS206,Theory of Computing,2,4,CSE,Main,
+,,,,,,,
+2_B_1,,Digital Forensic,2,4,ALL,Elective,
+2_B_2,,Embedded Intelligent Sensing Systems,2,4,ALL,Elective,
+2_B_3,,Operating System(dsai and ece),2,4,ALL,Elective,
+2_B_4,,Edge AI systems Design,2,4,ALL,Elective,
+2_B_5,,Causal Inference,2,4,ALL,Elective,
+2_B_6,,Time series Forecasting and applications,2,4,ALL,Elective,
+,,,,,,,
+2_M2_1,EC264,Analog ande Digital Communication,2,4,ECE,Main,
+2_M2_2,EC265,Linear Integrated Circuits,2,4,ECE,Main,
+2_M2_3,EC266,Control System,2,4,ECE,Main,
+2_M2_4,EC267,Digital Signal Processing,2,4,ECE,Main,
+2_M2_5,EC268,Embedded System Design ,2,4,ECE,Main,
+2_M2_6,EC301,Introduction to VLSI Design,2,4,ECE,Main,
+,,,,,,,
+2_M3_1,DS308,Data Security and Privacy,2,4,DSAI,Main,
+2_M3_2,DA263,Big Data Analytics,2,4,DSAI,Main,
+2_M3_3,DA264,Database Management and Warehousing,2,4,DSAI,Main,
+2_M3_4,DA265,Deep Learning,2,4,DSAI,Main,

@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Timetable Automation</title>
+    <style>
+        :root {
+            --color-primary: #208090;
+            --color-primary-hover: #1a6a75;
+            --color-bg: #f5f5f2;
+            --color-surface: #ffffff;
+            --color-text: #1a1a1a;
+            --color-text-light: #666;
+            --color-border: #e0e0e0;
+            --color-success: #22a56b;
+            --color-error: #d42c2c;
+            --color-warning: #d87a1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--color-primary);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--color-border);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        input[type="file"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: #666;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            margin-left: 5px;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #dcf4e8;
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .status.error {
+            background: #fde4e4;
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .status.warning {
+            background: #fff4e4;
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+
+        .status.info {
+            background: #e8f4ff;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            word-break: break-word;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .conflict {
+            background: #ffe4e4;
+            color: var(--color-error);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--color-border);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--color-text-light);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .instruction {
+            background: #e8f4ff;
+            border-left: 4px solid var(--color-primary);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .grid-schedule {
+            display: grid;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .date-section {
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .date-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .slot-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .slot-row:last-child {
+            border-bottom: none;
+        }
+
+        .slot-label {
+            background: #f9f9f9;
+            padding: 12px;
+            font-weight: 600;
+            border-right: 1px solid var(--color-border);
+            font-size: 12px;
+        }
+
+        .slot-content {
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .course-code {
+            display: inline-block;
+            background: var(--color-primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .course-code.elective {
+            background: #8b5cf6;
+        }
+
+        .course-code.year-1 {
+            background: #3b82f6;
+        }
+
+        .course-code.year-2 {
+            background: #10b981;
+        }
+
+        .course-code.year-3 {
+            background: #f59e0b;
+        }
+
+        .course-code.year-4 {
+            background: #ef4444;
+        }
+
+        .course-code.year-1.elective {
+            background: #6366f1;
+        }
+
+        .course-code.year-2.elective {
+            background: #059669;
+        }
+
+        .course-code.year-3.elective {
+            background: #d97706;
+        }
+
+        .course-code.year-4.elective {
+            background: #dc2626;
+        }
+
+        .empty-slot {
+            color: var(--color-text-light);
+            font-style: italic;
+        }
+
+        .date-input-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .date-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .date-item {
+            background: var(--color-primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-item button {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .date-item button:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .min-days-info {
+            background: #fff4e4;
+            border: 1px solid var(--color-warning);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .min-days-info.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .slot-row {
+                grid-template-columns: 100px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Exam Timetable Automation System</h1>
+            <p>For 1st-4th Year | CSE, ECE, DSAI Branches | Advanced Constraint Scheduling</p>
+        </div>
+
+        <div class="grid">
+            <!-- LEFT PANEL: INPUT -->
+            <div>
+                <div class="card">
+                    <h2>Input Configuration</h2>
+                    
+                    <div class="instruction">
+                        <strong>CSV Format:</strong> Tab-separated with headers: S. No., Course Code, Course Name, Year, Semester, Branch, Type, Basket ID<br>
+                        <strong>Important:</strong> Select enough exam dates! The system will spread exams across all available days.<br>
+                        <strong>Note:</strong> If you get "0 courses" error, press F12 to open browser console and check for details.
+                    </div>
+
+                    <div class="form-group">
+                        <label>Courses CSV File</label>
+                        <input type="file" id="coursesFile" accept=".csv,.txt">
+                    </div>
+
+                    <button class="btn" onclick="analyzeCourses()">🔍 Analyze & Calculate Minimum Days</button>
+
+                    <div id="minDaysInfo" class="min-days-info"></div>
+
+                    <div class="date-input-section">
+                        <label>Select Exam Dates</label>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                            <input type="date" id="dateInput" style="flex: 1;">
+                            <button class="btn btn-small" onclick="addDate()">Add Date</button>
+                        </div>
+                        <div id="dateList" class="date-list"></div>
+                    </div>
+
+                    <button class="btn" onclick="generateTimetable()">Generate Timetable</button>
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Download Template CSV</button>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: RESULTS -->
+            <div>
+                <div class="card">
+                    <h2>📊 Schedule Overview</h2>
+                    
+                    <div id="status" class="status"></div>
+
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalCourses">0</div>
+                            <div class="stat-label">Total Courses</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalBaskets">0</div>
+                            <div class="stat-label">Elective Baskets</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalSlots">0</div>
+                            <div class="stat-label">Available Slots</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="conflictCount">0</div>
+                            <div class="stat-label">Conflicts</div>
+                        </div>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab('grid')">Grid View</button>
+                        <button class="tab-btn" onclick="switchTab('table')">Table View</button>
+                        <button class="tab-btn" onclick="switchTab('conflicts')">Conflicts</button>
+                        <button class="tab-btn" onclick="switchTab('analysis')">Analysis</button>
+                    </div>
+
+                    <div id="grid" class="tab-content active">
+                        <div id="gridSchedule"></div>
+                    </div>
+
+                    <div id="table" class="tab-content">
+                        <div id="scheduleTable"></div>
+                    </div>
+
+                    <div id="conflicts" class="tab-content">
+                        <div id="conflictsList"></div>
+                    </div>
+
+                    <div id="analysis" class="tab-content">
+                        <div id="analysisPanel"></div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="downloadTimetable()">📥 Download Timetable (CSV)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ExamScheduler {
+            constructor() {
+                this.courses = [];
+                this.examDates = [];
+                this.slots = [
+                    { id: 'S1', start: '10:00', end: '11:30', label: 'Morning' },
+                    { id: 'S2', start: '14:00', end: '16:30', label: 'Afternoon' }
+                ];
+                this.timetable = [];
+                this.conflicts = [];
+                this.baskets = new Map();
+                this.mainCourses = new Map();
+            }
+
+            parseCSV(csvText) {
+                // Remove BOM if present
+                csvText = csvText.replace(/^\uFEFF/, '');
+                
+                // Try to detect delimiter (tab or comma)
+                const firstLine = csvText.split('\n')[0];
+                const delimiter = firstLine.includes('\t') ? '\t' : ',';
+                
+                // Split by line (handle both \r\n and \n)
+                const lines = csvText.split(/\r?\n/);
+                const headers = lines[0].split(delimiter).map(h => h.trim());
+                
+                console.log('CSV Headers detected:', headers);
+                
+                const data = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = lines[i].split(delimiter).map(v => v.trim());
+                    const obj = {};
+                    
+                    headers.forEach((h, idx) => {
+                        obj[h] = values[idx] || '';
+                    });
+                    
+                    // More flexible check for S. No. column
+                    const hasSerialNo = obj['S. No.'] || obj['S.No.'] || obj['S. No'] || obj['SNo'] || obj['Serial No'];
+                    
+                    if (hasSerialNo && hasSerialNo.length > 0) {
+                        // Normalize the object keys
+                        obj['S.No.'] = hasSerialNo;
+                        obj['Course Code'] = obj['Course Code'] || obj['CourseCode'] || obj['Code'] || '';
+                        obj['Course Name'] = obj['Course Name'] || obj['CourseName'] || obj['Name'] || '';
+                        obj['Year'] = obj['Year'] || '';
+                        obj['Semester'] = obj['Semester'] || obj['Sem'] || '';
+                        obj['Branch'] = obj['Branch'] || '';
+                        obj['Type'] = obj['Type'] || '';
+                        obj['Basket ID'] = obj['Basket ID'] || obj['BasketID'] || obj['Basket'] || '';
+                        
+                        data.push(obj);
+                    }
+                }
+                
+                console.log('Parsed courses:', data.length);
+                return data;
+            }
+
+            loadCourses(csvText) {
+                this.courses = this.parseCSV(csvText);
+                this.processCoursesIntoGroups();
+            }
+
+            processCoursesIntoGroups() {
+                this.baskets.clear();
+                this.mainCourses.clear();
+
+                console.log('Processing courses:', this.courses.length);
+
+                for (const course of this.courses) {
+                    const type = (course['Type'] || '').trim();
+                    const year = (course['Year'] || '').toString().trim();
+                    const branch = (course['Branch'] || '').trim();
+                    const basketId = (course['Basket ID'] || '').trim();
+
+                    console.log('Course:', course['Course Code'], 'Type:', type, 'Year:', year, 'Branch:', branch);
+
+                    if (type === 'Main') {
+                        const key = `${year}_${branch}`;
+                        if (!this.mainCourses.has(key)) {
+                            this.mainCourses.set(key, []);
+                        }
+                        this.mainCourses.get(key).push(course);
+                    } else if (type === 'Elective') {
+                        if (year === '2') {
+                            const basketKey = '2_ALL_ELECTIVES';
+                            if (!this.baskets.has(basketKey)) {
+                                this.baskets.set(basketKey, []);
+                            }
+                            this.baskets.get(basketKey).push(course);
+                        } else {
+                            if (basketId) {
+                                const basketKey = `${year}_${basketId}`;
+                                if (!this.baskets.has(basketKey)) {
+                                    this.baskets.set(basketKey, []);
+                                }
+                                this.baskets.get(basketKey).push(course);
+                            }
+                        }
+                    }
+                }
+
+                console.log('Main courses groups:', this.mainCourses.size);
+                console.log('Basket groups:', this.baskets.size);
+            }
+
+            calculateMinimumDays() {
+                const studentExams = new Map();
+
+                for (const [key, courses] of this.mainCourses) {
+                    studentExams.set(key, courses.length);
+                }
+
+                const basketsByYear = new Map();
+                for (const [basketKey] of this.baskets) {
+                    const year = basketKey.split('_')[0];
+                    if (!basketsByYear.has(year)) {
+                        basketsByYear.set(year, 0);
+                    }
+                    basketsByYear.set(year, basketsByYear.get(year) + 1);
+                }
+
+                for (const [studentKey, mainCount] of studentExams) {
+                    const year = studentKey.split('_')[0];
+                    const basketCount = basketsByYear.get(year) || 0;
+                    studentExams.set(studentKey, mainCount + basketCount);
+                }
+
+                for (const [year, basketCount] of basketsByYear) {
+                    const branches = ['CSE', 'ECE', 'DSAI'];
+                    for (const branch of branches) {
+                        const key = `${year}_${branch}`;
+                        if (!studentExams.has(key)) {
+                            studentExams.set(key, basketCount);
+                        }
+                    }
+                }
+
+                let maxExams = 0;
+                let maxStudent = '';
+                for (const [student, count] of studentExams) {
+                    if (count > maxExams) {
+                        maxExams = count;
+                        maxStudent = student;
+                    }
+                }
+
+                const minDays = Math.ceil(maxExams / 2);
+                return { minDays, maxExams, maxStudent };
+            }
+
+            schedule() {
+                this.timetable = [];
+                this.conflicts = [];
+
+                const schedule = [];
+                for (const date of this.examDates) {
+                    for (const slot of this.slots) {
+                        schedule.push({
+                            date: date,
+                            slotId: slot.id,
+                            slotLabel: `${slot.start}-${slot.end}`,
+                            entries: []
+                        });
+                    }
+                }
+
+                const studentDayExams = new Map();
+                const allItems = [];
+
+                // Collect all main courses
+                for (const [key, courses] of this.mainCourses) {
+                    for (const course of courses) {
+                        allItems.push({
+                            type: 'main',
+                            course: course,
+                            year: course['Year'],
+                            branch: course['Branch']
+                        });
+                    }
+                }
+
+                // Collect all baskets
+                for (const [basketKey, courses] of this.baskets) {
+                    allItems.push({
+                        type: 'basket',
+                        basketKey: basketKey,
+                        courses: courses,
+                        year: basketKey.split('_')[0]
+                    });
+                }
+
+                // Shuffle for randomization
+                this.shuffleArray(allItems);
+
+                // Schedule each item
+                for (const item of allItems) {
+                    let scheduled = false;
+
+                    // Try to find the best slot (prefer slots with fewer exams)
+                    const sortedSchedule = [...schedule].sort((a, b) => {
+                        // First, prefer different days (spread across dates)
+                        const aDateLoad = schedule.filter(s => s.date === a.date).reduce((sum, s) => sum + s.entries.length, 0);
+                        const bDateLoad = schedule.filter(s => s.date === b.date).reduce((sum, s) => sum + s.entries.length, 0);
+                        if (aDateLoad !== bDateLoad) return aDateLoad - bDateLoad;
+                        
+                        // Then, prefer slots with fewer entries
+                        return a.entries.length - b.entries.length;
+                    });
+
+                    for (const slot of sortedSchedule) {
+                        if (this.canScheduleItem(item, slot, studentDayExams)) {
+                            this.scheduleItem(item, slot, studentDayExams);
+                            scheduled = true;
+                            break;
+                        }
+                    }
+
+                    if (!scheduled) {
+                        if (item.type === 'main') {
+                            this.conflicts.push({
+                                course: item.course['Course Code'] || item.course['S.No.'],
+                                reason: 'Could not find suitable slot (try adding more dates)'
+                            });
+                        } else {
+                            this.conflicts.push({
+                                course: `Basket ${item.basketKey}`,
+                                reason: 'Could not find suitable slot (try adding more dates)'
+                            });
+                        }
+                    }
+                }
+
+                // Build final timetable
+                for (const slot of schedule) {
+                    for (const entry of slot.entries) {
+                        this.timetable.push({
+                            ...entry,
+                            date: slot.date,
+                            timeSlot: slot.slotLabel
+                        });
+                    }
+                }
+            }
+
+            canScheduleItem(item, slot, studentDayExams) {
+                // Check 1: If scheduling a basket, no other basket of same year in same slot
+                if (item.type === 'basket') {
+                    for (const entry of slot.entries) {
+                        if (entry.isBasket && entry.year === item.year) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Check 2: If scheduling a main course, this year-branch cannot already have an exam in this slot
+                if (item.type === 'main') {
+                    for (const entry of slot.entries) {
+                        // Critical: Same student (year+branch) cannot have 2 exams in same slot!
+                        if (entry.year === item.year && entry.branch === item.branch && !entry.isBasket) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Check 3: No basket for this year in the same slot (affects all branches)
+                if (item.type === 'main') {
+                    for (const entry of slot.entries) {
+                        if (entry.isBasket && entry.year === item.year) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Check 4: Max 2 exams per day per student (prefer 1, allow 2 if needed)
+                const affectedStudents = this.getAffectedStudents(item);
+                for (const student of affectedStudents) {
+                    const dayKey = `${student}-${slot.date}`;
+                    const currentCount = studentDayExams.get(dayKey) || 0;
+                    if (currentCount >= 2) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            scheduleItem(item, slot, studentDayExams) {
+                if (item.type === 'main') {
+                    slot.entries.push({
+                        courseCode: item.course['Course Code'] || item.course['S.No.'] || 'N/A',
+                        courseName: item.course['Course Name'] || 'Unknown Course',
+                        year: item.year,
+                        branch: item.branch,
+                        isBasket: false
+                    });
+
+                    const studentKey = `${item.year}-${item.branch}`;
+                    const dayKey = `${studentKey}-${slot.date}`;
+                    studentDayExams.set(dayKey, (studentDayExams.get(dayKey) || 0) + 1);
+                } else {
+                    for (const course of item.courses) {
+                        slot.entries.push({
+                            courseCode: course['Course Code'] || course['S.No.'] || 'N/A',
+                            courseName: course['Course Name'] || 'Unknown Course',
+                            year: item.year,
+                            branch: 'ALL',
+                            isBasket: true,
+                            basketKey: item.basketKey
+                        });
+                    }
+
+                    const affectedStudents = this.getAffectedStudents(item);
+                    for (const student of affectedStudents) {
+                        const dayKey = `${student}-${slot.date}`;
+                        studentDayExams.set(dayKey, (studentDayExams.get(dayKey) || 0) + 1);
+                    }
+                }
+            }
+
+            getAffectedStudents(item) {
+                const students = [];
+                if (item.type === 'main') {
+                    students.push(`${item.year}-${item.branch}`);
+                } else {
+                    const year = item.year;
+                    const branches = ['CSE', 'ECE', 'DSAI'];
+                    for (const branch of branches) {
+                        students.push(`${year}-${branch}`);
+                    }
+                }
+                return students;
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            getGridSchedule() {
+                const schedule = {};
+                for (const entry of this.timetable) {
+                    if (!schedule[entry.date]) {
+                        schedule[entry.date] = {};
+                    }
+                    if (!schedule[entry.date][entry.timeSlot]) {
+                        schedule[entry.date][entry.timeSlot] = [];
+                    }
+                    schedule[entry.date][entry.timeSlot].push(entry);
+                }
+                return schedule;
+            }
+
+            validateSchedule() {
+                // Check for students with multiple exams in same slot
+                const slotStudents = new Map();
+                
+                for (const entry of this.timetable) {
+                    const slotKey = `${entry.date}_${entry.timeSlot}`;
+                    
+                    if (!slotStudents.has(slotKey)) {
+                        slotStudents.set(slotKey, new Set());
+                    }
+                    
+                    // For main courses
+                    if (!entry.isBasket) {
+                        const studentKey = `${entry.year}_${entry.branch}`;
+                        if (slotStudents.get(slotKey).has(studentKey)) {
+                            this.conflicts.push({
+                                course1: entry.courseCode,
+                                date: entry.date,
+                                slot: entry.timeSlot,
+                                severity: 'CRITICAL',
+                                reason: `Student ${entry.year} ${entry.branch} has multiple exams in same slot`
+                            });
+                        }
+                        slotStudents.get(slotKey).add(studentKey);
+                    }
+                    
+                    // For baskets (affects all branches of that year)
+                    if (entry.isBasket) {
+                        const branches = ['CSE', 'ECE', 'DSAI'];
+                        for (const branch of branches) {
+                            const studentKey = `${entry.year}_${branch}`;
+                            slotStudents.get(slotKey).add(studentKey);
+                        }
+                    }
+                }
+            }
+        }
+
+        const scheduler = new ExamScheduler();
+        const selectedDates = [];
+
+        async function analyzeCourses() {
+            const coursesFile = document.getElementById('coursesFile');
+
+            if (!coursesFile.files[0]) {
+                showStatus('Please upload the Courses CSV file first', 'error');
+                return;
+            }
+
+            try {
+                const coursesText = await coursesFile.files[0].text();
+                scheduler.loadCourses(coursesText);
+
+                if (scheduler.courses.length === 0) {
+                    showStatus('Error: No courses found in file. Please check the file format. Open browser console (F12) to see details.', 'error');
+                    console.error('File content preview:', coursesText.substring(0, 500));
+                    return;
+                }
+
+                const { minDays, maxExams, maxStudent } = scheduler.calculateMinimumDays();
+                
+                const minDaysInfo = document.getElementById('minDaysInfo');
+                minDaysInfo.innerHTML = `
+                    <strong>Analysis Complete!</strong><br>
+                    Courses loaded: <strong>${scheduler.courses.length}</strong><br>
+                    Minimum Days Required: <strong>${minDays} days</strong><br>
+                    Maximum exams for any student: <strong>${maxExams} exams</strong> (${maxStudent.replace('_', ' Year ')})<br>
+                    <em>Please select at least ${minDays} exam dates below</em>
+                `;
+                minDaysInfo.classList.add('show');
+
+                showStatus(`✓ Analysis complete! Loaded ${scheduler.courses.length} courses. You need at least ${minDays} exam dates.`, 'success');
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+                console.error('Full error:', error);
+            }
+        }
+
+        function addDate() {
+            const dateInput = document.getElementById('dateInput');
+            const date = dateInput.value;
+
+            if (!date) {
+                showStatus('Please select a date', 'error');
+                return;
+            }
+
+            if (selectedDates.includes(date)) {
+                showStatus('This date is already added', 'warning');
+                return;
+            }
+
+            selectedDates.push(date);
+            selectedDates.sort();
+            renderDateList();
+            dateInput.value = '';
+        }
+
+        function removeDate(date) {
+            const index = selectedDates.indexOf(date);
+            if (index > -1) {
+                selectedDates.splice(index, 1);
+            }
+            renderDateList();
+        }
+
+        function renderDateList() {
+            const dateList = document.getElementById('dateList');
+            if (selectedDates.length === 0) {
+                dateList.innerHTML = '<div style="color: var(--color-text-light); font-size: 12px; margin-top: 10px;">No dates selected yet</div>';
+            } else {
+                let html = '';
+                for (const date of selectedDates) {
+                    html += `<div class="date-item">
+                        ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        <button onclick="removeDate('${date}')">✕</button>
+                    </div>`;
+                }
+                dateList.innerHTML = html;
+            }
+        }
+
+        async function generateTimetable() {
+            const coursesFile = document.getElementById('coursesFile');
+
+            if (!coursesFile.files[0]) {
+                showStatus('Please upload the Courses CSV file', 'error');
+                return;
+            }
+
+            if (selectedDates.length === 0) {
+                showStatus('Please add at least one exam date', 'error');
+                return;
+            }
+
+            try {
+                const coursesText = await coursesFile.files[0].text();
+                scheduler.loadCourses(coursesText);
+
+                const { minDays } = scheduler.calculateMinimumDays();
+                if (selectedDates.length < minDays) {
+                    showStatus(`Warning: You selected ${selectedDates.length} dates but need at least ${minDays} dates. Schedule may have conflicts.`, 'warning');
+                }
+
+                scheduler.examDates = selectedDates;
+                
+                showStatus('Generating schedule with constraints...', 'warning');
+
+                scheduler.schedule();
+                scheduler.validateSchedule();
+
+                renderResults();
+                
+                if (scheduler.conflicts.length === 0) {
+                    showStatus(`✓ Schedule generated successfully! ${scheduler.timetable.length} exams scheduled with no conflicts.`, 'success');
+                } else {
+                    showStatus(`Schedule generated with ${scheduler.conflicts.length} conflicts. Try adding more exam dates or adjusting constraints.`, 'warning');
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        function renderResults() {
+            const uniqueBaskets = new Set();
+            for (const [key] of scheduler.baskets) {
+                uniqueBaskets.add(key);
+            }
+
+            document.getElementById('totalCourses').textContent = scheduler.courses.length;
+            document.getElementById('totalBaskets').textContent = uniqueBaskets.size;
+            document.getElementById('totalSlots').textContent = scheduler.slots.length * selectedDates.length;
+            document.getElementById('conflictCount').textContent = scheduler.conflicts.length;
+
+            const gridSchedule = scheduler.getGridSchedule();
+            let gridHtml = '<div class="grid-schedule">';
+            
+            // Add legend
+            gridHtml += `<div style="margin-bottom: 15px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <strong>Color Legend:</strong> 
+                <span class="course-code year-1" style="margin-left: 10px;">Year 1</span>
+                <span class="course-code year-2" style="margin-left: 5px;">Year 2</span>
+                <span class="course-code year-3" style="margin-left: 5px;">Year 3</span>
+                <span class="course-code year-4" style="margin-left: 5px;">Year 4</span>
+                <span class="course-code elective" style="margin-left: 15px;">Elective Baskets</span>
+            </div>`;
+            
+            for (const date of selectedDates) {
+                const dateObj = new Date(date);
+                const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                gridHtml += `<div class="date-section">
+                    <div class="date-header">${dateStr}</div>`;
+                
+                for (const slot of scheduler.slots) {
+                    const slotKey = `${slot.start}-${slot.end}`;
+                    const entries = gridSchedule[date] && gridSchedule[date][slotKey] ? gridSchedule[date][slotKey] : [];
+                    
+                    gridHtml += `<div class="slot-row">
+                        <div class="slot-label">${slot.label}<br/>${slot.start}-${slot.end}</div>
+                        <div class="slot-content">`;
+                    
+                    if (entries.length === 0) {
+                        gridHtml += `<span class="empty-slot">-- No exams --</span>`;
+                    } else {
+                        for (const entry of entries) {
+                            const yearClass = `year-${entry.year}`;
+                            const electiveClass = entry.isBasket ? 'elective' : '';
+                            const cssClass = `course-code ${yearClass} ${electiveClass}`.trim();
+                            const title = `${entry.courseName} (${entry.branch} Y${entry.year})`;
+                            gridHtml += `<span class="${cssClass}" title="${title}">${entry.courseCode}</span>`;
+                        }
+                    }
+                    
+                    gridHtml += `</div></div>`;
+                }
+                gridHtml += `</div>`;
+            }
+            gridHtml += '</div>';
+            document.getElementById('gridSchedule').innerHTML = gridHtml;
+
+            let tableHtml = '<div class="table-wrapper"><table>';
+            tableHtml += '<thead><tr><th>Code</th><th>Name</th><th>Year</th><th>Branch</th><th>Date</th><th>Time</th><th>Type</th></tr></thead><tbody>';
+            
+            for (const item of scheduler.timetable) {
+                const type = item.isBasket ? `Basket: ${item.basketKey}` : 'Main';
+                const dateObj = new Date(item.date);
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                tableHtml += `<tr>
+                    <td><strong>${item.courseCode}</strong></td>
+                    <td>${item.courseName}</td>
+                    <td>${item.year}</td>
+                    <td>${item.branch}</td>
+                    <td>${dateStr}</td>
+                    <td>${item.timeSlot}</td>
+                    <td>${type}</td>
+                </tr>`;
+            }
+            tableHtml += '</tbody></table></div>';
+            document.getElementById('scheduleTable').innerHTML = tableHtml;
+
+            let conflictHtml = '';
+            if (scheduler.conflicts.length === 0) {
+                conflictHtml = '<div style="background:#dcf4e8; padding:12px; border-radius:6px; color:var(--color-success);">✓ No conflicts detected! All constraints satisfied.</div>';
+            } else {
+                const criticalConflicts = scheduler.conflicts.filter(c => c.severity === 'CRITICAL');
+                if (criticalConflicts.length > 0) {
+                    conflictHtml += `<div style="background:#fde4e4; padding:12px; border-radius:6px; color:var(--color-error); margin-bottom:15px;">
+                        <strong>⚠️ CRITICAL: ${criticalConflicts.length} students have multiple exams in same slot!</strong>
+                    </div>`;
+                }
+                
+                conflictHtml += '<div class="table-wrapper"><table>';
+                conflictHtml += '<thead><tr><th>Course/Item</th><th>Course 2</th><th>Date</th><th>Time</th><th>Issue</th><th>Severity</th></tr></thead><tbody>';
+                
+                for (const conf of scheduler.conflicts) {
+                    const severityColor = conf.severity === 'CRITICAL' ? 'background: #fde4e4;' : '';
+                    conflictHtml += `<tr class="conflict" style="${severityColor}">
+                        <td><strong>${conf.course1 || conf.course}</strong></td>
+                        <td>${conf.course2 || 'N/A'}</td>
+                        <td>${conf.date || 'N/A'}</td>
+                        <td>${conf.slot || 'N/A'}</td>
+                        <td>${conf.reason}</td>
+                        <td><strong>${conf.severity || 'High'}</strong></td>
+                    </tr>`;
+                }
+                conflictHtml += '</tbody></table></div>';
+                conflictHtml += `<div style="margin-top:15px; padding:12px; background:#fff4e4; border-radius:6px;">
+                    <strong>💡 Suggestions:</strong><br>
+                    • Add more exam dates to spread out the schedule<br>
+                    • Critical conflicts mean students have 2+ exams at same time - need more slots!
+                </div>`;
+            }
+            document.getElementById('conflictsList').innerHTML = conflictHtml;
+
+            const branchStats = {};
+            const yearStats = {};
+            
+            for (const item of scheduler.timetable) {
+                if (item.branch !== 'ALL') {
+                    branchStats[item.branch] = (branchStats[item.branch] || 0) + 1;
+                }
+                yearStats[item.year] = (yearStats[item.year] || 0) + 1;
+            }
+
+            let analysisHtml = '<h3 style="margin-bottom:15px;">📊 Distribution by Branch</h3>';
+            for (const [branch, count] of Object.entries(branchStats)) {
+                analysisHtml += `<div style="margin-bottom:8px;"><strong>${branch}:</strong> ${count} main courses</div>`;
+            }
+            
+            analysisHtml += '<h3 style="margin-top:20px;margin-bottom:15px;">📊 Distribution by Year</h3>';
+            for (const [year, count] of Object.entries(yearStats).sort()) {
+                analysisHtml += `<div style="margin-bottom:8px;"><strong>Year ${year}:</strong> ${count} exams</div>`;
+            }
+
+            analysisHtml += '<h3 style="margin-top:20px;margin-bottom:15px;">🎓 Elective Baskets</h3>';
+            for (const [basketKey, courses] of scheduler.baskets) {
+                analysisHtml += `<div style="margin-bottom:8px;"><strong>${basketKey}:</strong> ${courses.length} courses</div>`;
+            }
+
+            analysisHtml += '<h3 style="margin-top:20px;margin-bottom:15px;">📅 Schedule Distribution</h3>';
+            const daysUsed = new Set(scheduler.timetable.map(t => t.date)).size;
+            const totalDays = selectedDates.length;
+            analysisHtml += `<div style="margin-bottom:8px;"><strong>Days Used:</strong> ${daysUsed} out of ${totalDays} available days</div>`;
+            
+            const examsPerDay = {};
+            for (const item of scheduler.timetable) {
+                examsPerDay[item.date] = (examsPerDay[item.date] || 0) + 1;
+            }
+            const avgPerDay = (scheduler.timetable.length / daysUsed).toFixed(1);
+            analysisHtml += `<div style="margin-bottom:8px;"><strong>Average exams per day:</strong> ${avgPerDay}</div>`;
+
+            document.getElementById('analysisPanel').innerHTML = analysisHtml;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showStatus(msg, type) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.className = `status show ${type}`;
+        }
+
+        function downloadTemplate() {
+            const template = `S. No.\tCourse Code\tCourse Name\tYear\tSemester\tBranch\tType\tBasket ID
+3_M1_1\tCS307\tMachine Learning\t3\t6\tCSE\tMain\t
+3_M2_1\tEC307\tWireless Communication\t3\t6\tECE\tMain\t
+3_M3_1\tDS308\tData Security and Privacy\t3\t6\tDSAI\tMain\t
+3_B1_1\tEC456\tReinforcement Learning\t3\t6\tALL\tElective\tB1
+3_B1_2\tCS371\tGPU Computing\t3\t6\tALL\tElective\tB1
+2_M1_1\tCS265\tSoftware Engineering\t2\t4\tCSE\tMain\t
+2_B_1\t\tDigital Forensic\t2\t4\tALL\tElective\t
+2_B_2\t\tOperating System\t2\t4\tALL\tElective\t`;
+
+            downloadFile(template, 'courses_template.csv');
+            showStatus('Template file downloaded! Fill with your data (tab-separated).', 'success');
+        }
+
+        function downloadFile(content, filename) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function downloadTimetable() {
+            if (scheduler.timetable.length === 0) {
+                showStatus('No timetable generated yet', 'error');
+                return;
+            }
+
+            let csv = 'Course Code,Course Name,Year,Branch,Date,Time Slot,Type,Basket Key\n';
+            for (const item of scheduler.timetable) {
+                const type = item.isBasket ? 'Elective' : 'Main';
+                const basket = item.basketKey || 'N/A';
+                csv += `${item.courseCode},"${item.courseName}",${item.year},${item.branch},${item.date},"${item.timeSlot}",${type},"${basket}"\n`;
+            }
+
+            downloadFile(csv, 'exam_timetable.csv');
+            showStatus('Timetable downloaded successfully!', 'success');
+        }
+
+        renderDateList();
+    </script>
+</body>
+</html>

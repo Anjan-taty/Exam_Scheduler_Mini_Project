@@ -1,0 +1,6 @@
+BasketID,BasketName,Year,Semester,CourseIDs
+B1,Basket 1,3,6,B1_1,B1_2,B1_3,B1_4,B1_5,B1_6,B1_7
+B2,Basket 2,3,6,B2_1,B2_2,B2_3,B2_4,B2_5,B2_6
+B3,Basket 3,3,6,B3_1,B3_2,B3_3,B3_4,B3_5,B3_6
+B4,Basket 4,3,6,B4_1,B4_2,B4_3,B4_4,B4_5,B4_6,B4_7
+B5,Basket 5,3,6,B5_1,B5_2,B5_3,B5_4,B5_5,B5_6,B5_7,B5_8,B5_9
