@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Scheduling System</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #208090;
+            --color-primary-hover: #1a6a75;
+            --color-bg: #f5f5f2;
+            --color-surface: #ffffff;
+            --color-text: #1a1a1a;
+            --color-text-light: #666;
+            --color-border: #e0e0e0;
+            --color-success: #22a56b;
+            --color-error: #d42c2c;
+            --color-warning: #d87a1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--color-primary);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--color-border);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        input[type="file"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            width: auto;
+            margin-left: 5px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #dcf4e8;
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .status.error {
+            background: #fde4e4;
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .status.warning {
+            background: #fff4e4;
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+
+        .status.info {
+            background: #e8f4ff;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+        }
+
+        .analysis-box {
+            background: #fff4e4;
+            border: 1px solid var(--color-warning);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .analysis-box.show {
+            display: block;
+        }
+
+        .date-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .date-item {
+            background: var(--color-primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-item button {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .timetable-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 800px;
+        }
+
+        .timetable th {
+            background: var(--color-primary);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #fff;
+            font-weight: 600;
+        }
+
+        .timetable td {
+            padding: 10px 8px;
+            border: 1px solid var(--color-border);
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .timetable .slot-header {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+
+        .course-tag {
+            display: inline-block;
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            margin: 2px;
+            font-size: 11px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-top: 5px;
+        }
+
+        .count-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+
+        .count-table th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+        }
+
+        .count-table td {
+            padding: 8px 10px;
+            border: 1px solid var(--color-border);
+        }
+
+        .count-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .year-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .year-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f8fa;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 10px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: border-color 0.2s, background 0.2s;
+            user-select: none;
+        }
+
+        .year-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color-primary);
+            cursor: pointer;
+        }
+
+        .year-checkbox:has(input:checked) {
+            border-color: var(--color-primary);
+            background: #e1f3f5;
+        }
+
+        .year-divider {
+            border: none;
+            border-top: 1px dashed var(--color-border);
+            margin: 15px 0;
+        }
+
+        .file-uploads-section {
+            display: none;
+        }
+
+        .file-uploads-section.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Exam Scheduling System</h1>
+            <p>IIIT Dharwad - Automated Exam Timetable Generator</p>
+        </div>
+
+        <div class="card">
+            <h2>📥 Upload Enrollment Files</h2>
+
+            <label style="font-size: 14px; font-weight: 600; margin-bottom: 10px; display: block;">Step 1 — Select the year(s) to schedule exams for:</label>
+            <div class="year-selector">
+                <label class="year-checkbox"><input type="checkbox" id="chk1" value="1" onchange="renderFileInputs()"> 1st Year</label>
+                <label class="year-checkbox"><input type="checkbox" id="chk2" value="2" onchange="renderFileInputs()"> 2nd Year</label>
+                <label class="year-checkbox"><input type="checkbox" id="chk3" value="3" onchange="renderFileInputs()"> 3rd Year</label>
+                <label class="year-checkbox"><input type="checkbox" id="chk4" value="4" onchange="renderFileInputs()"> 4th Year</label>
+            </div>
+
+            <hr class="year-divider">
+
+            <div id="fileUploadsSection" class="file-uploads-section">
+                <label style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: block;">Step 2 — Upload the enrollment file for each selected year:</label>
+                <div id="dynamicFileInputs"></div>
+                <button class="btn" onclick="analyzeFiles()">🔍 Analyze & Calculate Minimum Days</button>
+            </div>
+
+            <div id="status" class="status"></div>
+        </div>
+
+        <div id="analysisBox" class="analysis-box">
+            <h3 style="margin-bottom: 10px;">📊 Analysis Complete!</h3>
+            <div id="analysisText"></div>
+        </div>
+
+        <div id="dateSelectionCard" class="card" style="display: none;">
+            <h2>📅 Select Exam Dates</h2>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                <input type="date" id="dateInput" style="flex: 1;">
+                <button class="btn btn-small" onclick="addDate()">Add Date</button>
+            </div>
+            <div id="dateList" class="date-list"></div>
+            <button class="btn" onclick="generateTimetable()" style="margin-top: 15px;">🚀 Generate Timetable</button>
+        </div>
+
+        <div id="resultsCard" class="card" style="display: none;">
+            <h2>📊 Generated Timetable</h2>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div id="timetableContainer" class="timetable-container"></div>
+            <button class="btn" onclick="downloadTimetable()" style="margin-top: 15px;">📥 Download Timetable (Excel)</button>
+        </div>
+
+        <div id="enrollmentCard" class="card" style="display: none;">
+            <h2>👥 Course Enrollment Count</h2>
+            <div id="enrollmentTable"></div>
+            <button class="btn" onclick="downloadEnrollmentCount()" style="margin-top: 15px;">📥 Download Enrollment Count (Excel)</button>
+        </div>
+    </div>
+
+    <script>
+        let yearDataMap = {};
+        let selectedYears = [];
+        let allCourses = new Map();
+        let studentEnrollments = new Map();
+        let selectedDates = [];
+        let generatedSchedule = null;
+        let minSlotsRequired = 0;
+        let cachedAnalysis = null;
+
+        const yearLabels = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th' };
+
+        function renderFileInputs() {
+            selectedYears = [1,2,3,4].filter(y => document.getElementById('chk'+y).checked);
+            const section = document.getElementById('fileUploadsSection');
+            const container = document.getElementById('dynamicFileInputs');
+            if (selectedYears.length === 0) {
+                section.classList.remove('show');
+                return;
+            }
+            section.classList.add('show');
+            container.innerHTML = selectedYears.map(y =>
+                '<div class="form-group">' +
+                '<label>' + yearLabels[y] + ' Year Enrollments (.xlsx, .csv)</label>' +
+                '<input type="file" id="yearFile' + y + '" accept=".xlsx,.csv">' +
+                '</div>'
+            ).join('');
+        }
+
+        function showStatus(msg, type) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.className = `status show ${type}`;
+        }
+
+        // FIX 1: Case-insensitive, trim-safe column lookup
+        // Handles 'Roll No. ' (trailing space), 'Course code' vs 'Course Code', etc.
+        function getCol(row, ...keys) {
+            const rowKeys = Object.keys(row);
+            for (const key of keys) {
+                const found = rowKeys.find(k => k.trim().toLowerCase() === key.trim().toLowerCase());
+                if (found !== undefined && row[found] !== undefined && row[found] !== null && row[found] !== '') {
+                    return String(row[found]).trim();
+                }
+            }
+            return undefined;
+        }
+
+        async function parseFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                const isCSV = file.name.toLowerCase().endsWith('.csv');
+                reader.onload = (e) => {
+                    try {
+                        if (isCSV) {
+                            const workbook = XLSX.read(e.target.result, { type: 'string' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            resolve(XLSX.utils.sheet_to_json(firstSheet));
+                        } else {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            resolve(XLSX.utils.sheet_to_json(firstSheet));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                if (isCSV) reader.readAsText(file);
+                else reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function analyzeFiles() {
+            if (typeof XLSX === 'undefined') {
+                showStatus('Error: Excel library not loaded. Please refresh the page.', 'error');
+                return;
+            }
+
+            if (selectedYears.length === 0) {
+                showStatus('Please select at least one year before uploading files.', 'error');
+                return;
+            }
+
+            // Validate all selected years have files
+            for (const y of selectedYears) {
+                const fileInput = document.getElementById('yearFile' + y);
+                if (!fileInput || !fileInput.files[0]) {
+                    showStatus('Please upload a file for ' + yearLabels[y] + ' year.', 'error');
+                    return;
+                }
+            }
+
+            try {
+                showStatus('Reading files...', 'info');
+                yearDataMap = {};
+                for (const y of selectedYears) {
+                    const file = document.getElementById('yearFile' + y).files[0];
+                    yearDataMap[y] = await parseFile(file);
+                }
+
+                showStatus('Analyzing enrollments...', 'info');
+                processEnrollments();
+
+                const anomalies = checkAnomalies();
+                if (anomalies.length > 0) {
+                    showStatus('⚠️ Anomalies detected! Check analysis box.', 'error');
+                    displayAnalysis(anomalies, true, null);
+                    return;
+                }
+
+                cachedAnalysis = calculateMinimumSlots();
+                minSlotsRequired = cachedAnalysis.minSlots;
+
+                displayAnalysis([], false, cachedAnalysis);
+                document.getElementById('dateSelectionCard').style.display = 'block';
+                showStatus('✓ Analysis complete! Select exam dates below.', 'success');
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        function processEnrollments() {
+            allCourses.clear();
+            studentEnrollments.clear();
+
+            for (const y of selectedYears) {
+                const rows = yearDataMap[y] || [];
+                const label = yearLabels[y] + ' Year';
+
+                for (const row of rows) {
+                    const courseCode = getCol(row, 'course code', 'coursecode');
+                    const courseName = getCol(row, 'course name', 'coursename');
+                    const rollNo     = getCol(row, 'roll no.', 'roll no', 'rollno');
+
+                    if (!courseCode || !rollNo) continue;
+
+                    if (!allCourses.has(courseCode)) {
+                        allCourses.set(courseCode, {
+                            code: courseCode,
+                            name: courseName,
+                            students: new Set(),
+                            year: label
+                        });
+                    } else {
+                        const existing = allCourses.get(courseCode);
+                        if (existing.year !== label) existing.year = 'Multiple Years';
+                        if (existing.name !== courseName) {
+                            existing.nameMismatch = true;
+                            existing.altName = courseName;
+                        }
+                    }
+
+                    allCourses.get(courseCode).students.add(rollNo);
+
+                    if (!studentEnrollments.has(rollNo)) {
+                        studentEnrollments.set(rollNo, { courses: new Set(), year: label });
+                    }
+                    studentEnrollments.get(rollNo).courses.add(courseCode);
+                }
+            }
+        }
+
+        function checkAnomalies() {
+            const anomalies = [];
+            for (const [code, course] of allCourses) {
+                if (course.nameMismatch) {
+                    anomalies.push({
+                        type: 'Name Mismatch',
+                        courseCode: code,
+                        name1: course.name,
+                        name2: course.altName
+                    });
+                }
+            }
+            return anomalies;
+        }
+
+        function buildConflictMap() {
+            // FIX 6: Always build from a fresh copy — never sort the shared Map keys
+            const courseList = Array.from(allCourses.keys());
+            const conflicts = new Map();
+            for (const course of courseList) {
+                conflicts.set(course, new Set());
+            }
+            for (const [, data] of studentEnrollments) {
+                const courses = Array.from(data.courses);
+                for (let i = 0; i < courses.length; i++) {
+                    for (let j = i + 1; j < courses.length; j++) {
+                        if (conflicts.has(courses[i])) conflicts.get(courses[i]).add(courses[j]);
+                        if (conflicts.has(courses[j])) conflicts.get(courses[j]).add(courses[i]);
+                    }
+                }
+            }
+            return conflicts;
+        }
+
+        function calculateMinimumSlots() {
+            const courseList = Array.from(allCourses.keys());
+            const conflicts = buildConflictMap();
+
+            // Greedy graph coloring
+            const colors = new Map();
+            let maxColor = 0;
+
+            // Sort by conflict count descending for a better greedy result
+            const sorted = [...courseList].sort((a, b) => conflicts.get(b).size - conflicts.get(a).size);
+
+            for (const course of sorted) {
+                const usedColors = new Set();
+                for (const neighbor of conflicts.get(course)) {
+                    if (colors.has(neighbor)) usedColors.add(colors.get(neighbor));
+                }
+                let color = 1;
+                while (usedColors.has(color)) color++;
+                colors.set(course, color);
+                maxColor = Math.max(maxColor, color);
+            }
+
+            let maxExamsPerStudent = 0;
+            let studentWithMax = '';
+            for (const [student, data] of studentEnrollments) {
+                if (data.courses.size > maxExamsPerStudent) {
+                    maxExamsPerStudent = data.courses.size;
+                    studentWithMax = student;
+                }
+            }
+
+            return {
+                minSlots: maxColor,
+                maxExams: maxExamsPerStudent,
+                studentWithMax: studentWithMax
+            };
+        }
+
+        function displayAnalysis(anomalies, hasErrors, analysis) {
+            const analysisBox = document.getElementById('analysisBox');
+            const analysisText = document.getElementById('analysisText');
+            let html = '';
+
+            if (hasErrors) {
+                html += '<div style="color: var(--color-error); margin-bottom: 10px;"><strong>⚠️ Anomalies Detected:</strong></div>';
+                for (const anomaly of anomalies) {
+                    html += `<div style="margin-bottom: 8px;">• Course Code <strong>${anomaly.courseCode}</strong>: Different names found - "${anomaly.name1}" and "${anomaly.altName}"</div>`;
+                }
+                html += '<div style="margin-top: 10px; font-size: 12px;">Please fix these issues before generating the timetable.</div>';
+            } else {
+                html += `<div style="margin-bottom: 8px;"><strong>Courses loaded:</strong> ${allCourses.size}</div>`;
+                html += `<div style="margin-bottom: 8px;"><strong>Total students:</strong> ${studentEnrollments.size}</div>`;
+                html += `<div style="margin-bottom: 8px;"><strong>Minimum Slots Required:</strong> ${analysis.minSlots} slots</div>`;
+                html += `<div style="margin-bottom: 8px;"><strong>Minimum Days Required:</strong> ${Math.ceil(analysis.minSlots / 2)} days (with 2 slots/day)</div>`;
+                html += `<div style="margin-bottom: 8px;"><strong>Maximum exams for any student:</strong> ${analysis.maxExams} exams</div>`;
+                html += `<div style="margin-top: 10px; font-style: italic; font-size: 12px;">Please select at least ${Math.ceil(analysis.minSlots / 2)} exam dates below</div>`;
+            }
+
+            analysisText.innerHTML = html;
+            analysisBox.classList.add('show');
+        }
+
+        function addDate() {
+            const dateInput = document.getElementById('dateInput');
+            const date = dateInput.value;
+
+            if (!date) {
+                showStatus('Please select a date', 'error');
+                return;
+            }
+
+            if (selectedDates.includes(date)) {
+                showStatus('This date is already added', 'warning');
+                return;
+            }
+
+            selectedDates.push(date);
+            selectedDates.sort();
+            renderDateList();
+            dateInput.value = '';
+        }
+
+        function removeDate(date) {
+            const index = selectedDates.indexOf(date);
+            if (index > -1) selectedDates.splice(index, 1);
+            renderDateList();
+        }
+
+        function renderDateList() {
+            const dateList = document.getElementById('dateList');
+            if (selectedDates.length === 0) {
+                dateList.innerHTML = '<div style="color: var(--color-text-light); font-size: 12px;">No dates selected yet</div>';
+            } else {
+                let html = '';
+                for (const date of selectedDates) {
+                    // FIX 5: Append T12:00:00 to avoid UTC midnight timezone shift
+                    const dateObj = new Date(date + 'T12:00:00');
+                    html += `<div class="date-item">
+                        ${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        <button onclick="removeDate('${date}')">✕</button>
+                    </div>`;
+                }
+                dateList.innerHTML = html;
+            }
+        }
+
+        function generateTimetable() {
+            if (selectedDates.length === 0) {
+                showStatus('Please add at least one exam date', 'error');
+                return;
+            }
+
+            const minDaysNeeded = Math.ceil(minSlotsRequired / 2);
+            if (selectedDates.length < minDaysNeeded) {
+                showStatus(`⚠️ Warning: You selected ${selectedDates.length} days but need at least ${minDaysNeeded} days. Schedule may have conflicts.`, 'warning');
+            }
+
+            const totalSlots = selectedDates.length * 2;
+            const useAfternoonFreely = (totalSlots <= minSlotsRequired * 1.2);
+
+            // FIX 3: Retry up to 8 times with different orderings to avoid greedy dead-ends
+            const schedule = scheduleExamsWithRetry(useAfternoonFreely);
+
+            if (schedule) {
+                generatedSchedule = schedule;
+                displayTimetable(schedule);
+                displayEnrollmentCount();
+                document.getElementById('resultsCard').style.display = 'block';
+                document.getElementById('enrollmentCard').style.display = 'block';
+                showStatus('✓ Timetable generated successfully!', 'success');
+            } else {
+                showStatus('⚠️ Could not generate valid timetable with given dates. Try adding more dates.', 'error');
+            }
+        }
+
+        // FIX 3: Wrapper that retries with shuffled orderings
+        function scheduleExamsWithRetry(useAfternoonFreely) {
+            // First attempt: sorted by conflict count (best greedy heuristic)
+            let result = scheduleExams(useAfternoonFreely, 'sorted');
+            if (result) return result;
+
+            // Subsequent attempts: random shuffles
+            for (let i = 0; i < 8; i++) {
+                result = scheduleExams(useAfternoonFreely, 'random');
+                if (result) return result;
+            }
+            return null;
+        }
+
+        function scheduleExams(useAfternoonFreely, ordering) {
+            const conflicts = buildConflictMap();
+            let courseList = Array.from(allCourses.keys());
+
+            // FIX 6: Work on a local copy — never mutate shared state
+            if (ordering === 'sorted') {
+                courseList = [...courseList].sort((a, b) => conflicts.get(b).size - conflicts.get(a).size);
+            } else {
+                courseList = [...courseList].sort(() => Math.random() - 0.5);
+            }
+
+            const schedule = {
+                slots: [],
+                assignments: new Map()
+            };
+
+            for (const date of selectedDates) {
+                schedule.slots.push({ date, time: 'FN: 11:00 AM to 12:30 PM', type: 'morning',   courses: [] });
+                schedule.slots.push({ date, time: 'AN: 3:00PM to 4:30PM',     type: 'afternoon', courses: [] });
+            }
+
+            // Feature 2: shuffle afternoon slots so assignment order is random
+            const shuffledAfternoon = schedule.slots
+                .filter(s => s.type === 'afternoon')
+                .sort(() => Math.random() - 0.5);
+
+            if (useAfternoonFreely) {
+                const allSlots = [
+                    ...schedule.slots.filter(s => s.type === 'morning'),
+                    ...shuffledAfternoon
+                ];
+                for (const course of courseList) {
+                    let assigned = false;
+                    for (const slot of allSlots) {
+                        if (canAssignToSlot(course, slot, conflicts, schedule)) {
+                            slot.courses.push(course);
+                            schedule.assignments.set(course, slot);
+                            assigned = true;
+                            break;
+                        }
+                    }
+                    if (!assigned) return null;
+                }
+            } else {
+                const morningSlots = schedule.slots.filter(s => s.type === 'morning');
+
+                for (const course of courseList) {
+                    let assigned = false;
+                    for (const slot of morningSlots) {
+                        if (canAssignToSlot(course, slot, conflicts, schedule)) {
+                            slot.courses.push(course);
+                            schedule.assignments.set(course, slot);
+                            assigned = true;
+                            break;
+                        }
+                    }
+                    if (!assigned) {
+                        // Try afternoon slots in random order
+                        for (const slot of shuffledAfternoon) {
+                            if (canAssignToSlot(course, slot, conflicts, schedule)) {
+                                slot.courses.push(course);
+                                schedule.assignments.set(course, slot);
+                                assigned = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!assigned) return null;
+                }
+            }
+
+            return schedule;
+        }
+
+        function canAssignToSlot(course, slot, conflicts, schedule) {
+            // Check direct course conflicts in this slot
+            for (const existingCourse of slot.courses) {
+                if (conflicts.get(course) && conflicts.get(course).has(existingCourse)) {
+                    return false;
+                }
+            }
+
+            // FIX 2: Enforce max 1 exam per student per slot (not 2 per day)
+            // A student should not have two courses in the same slot
+            for (const [, data] of studentEnrollments) {
+                if (!data.courses.has(course)) continue;
+                for (const existingCourse of slot.courses) {
+                    if (data.courses.has(existingCourse)) return false;
+                }
+            }
+
+            // Also enforce max 2 exams per student per day (1 morning + 1 afternoon is fine)
+            const date = slot.date;
+            const slotsOnThisDay = schedule.slots.filter(s => s.date === date);
+            for (const [, data] of studentEnrollments) {
+                if (!data.courses.has(course)) continue;
+                let examsOnThisDay = 0;
+                for (const daySlot of slotsOnThisDay) {
+                    for (const c of daySlot.courses) {
+                        if (data.courses.has(c)) examsOnThisDay++;
+                    }
+                }
+                if (examsOnThisDay >= 2) return false;
+            }
+
+            return true;
+        }
+
+        function displayTimetable(schedule) {
+            const container = document.getElementById('timetableContainer');
+
+            let html = '<table class="timetable"><thead><tr>';
+            html += '<th>Date</th>';
+            for (const date of selectedDates) {
+                // FIX 5: Use T12:00:00 to avoid UTC midnight timezone shift
+                const dateObj = new Date(date + 'T12:00:00');
+                html += `<th>${dateObj.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}<br>${dateObj.toLocaleDateString('en-US', { weekday: 'long' })}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            // FN row
+            html += '<tr><td class="slot-header">FN: 11:00 AM to 12:30 PM</td>';
+            for (const date of selectedDates) {
+                const morningSlot = schedule.slots.find(s => s.date === date && s.type === 'morning');
+                html += '<td>';
+                if (morningSlot && morningSlot.courses.length > 0) {
+                    for (const course of morningSlot.courses) {
+                        html += `<span class="course-tag">${course}</span>`;
+                    }
+                } else {
+                    html += '----';
+                }
+                html += '</td>';
+            }
+            html += '</tr>';
+
+            // AN row
+            html += '<tr><td class="slot-header">AN: 3:00PM to 4:30PM</td>';
+            for (const date of selectedDates) {
+                const afternoonSlot = schedule.slots.find(s => s.date === date && s.type === 'afternoon');
+                html += '<td>';
+                if (afternoonSlot && afternoonSlot.courses.length > 0) {
+                    for (const course of afternoonSlot.courses) {
+                        html += `<span class="course-tag">${course}</span>`;
+                    }
+                } else {
+                    html += '----';
+                }
+                html += '</td>';
+            }
+            html += '</tr>';
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            displayStats(schedule);
+        }
+
+        function displayStats(schedule) {
+            const statsGrid = document.getElementById('statsGrid');
+            const totalCourses  = allCourses.size;
+            const totalSlots    = schedule.slots.length;
+            const usedSlots     = schedule.slots.filter(s => s.courses.length > 0).length;
+            const morningUsed   = schedule.slots.filter(s => s.type === 'morning'   && s.courses.length > 0).length;
+            const afternoonUsed = schedule.slots.filter(s => s.type === 'afternoon' && s.courses.length > 0).length;
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalCourses}</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${usedSlots}/${totalSlots}</div>
+                    <div class="stat-label">Slots Used</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${morningUsed}</div>
+                    <div class="stat-label">Morning Slots Used</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${afternoonUsed}</div>
+                    <div class="stat-label">Afternoon Slots Used</div>
+                </div>
+            `;
+        }
+
+        function displayEnrollmentCount() {
+            const container = document.getElementById('enrollmentTable');
+            const courses = Array.from(allCourses.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+
+            let html = '<table class="count-table"><thead><tr><th>Course Code</th><th>Course Name</th><th>Count</th></tr></thead><tbody>';
+            for (const [code, course] of courses) {
+                html += `<tr>
+                    <td><strong>${code}</strong></td>
+                    <td>${course.name}</td>
+                    <td>${course.students.size}</td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function downloadTimetable() {
+            if (!generatedSchedule) return;
+
+            const wb = XLSX.utils.book_new();
+            const wsData = [['Date']];
+
+            for (const date of selectedDates) {
+                // FIX 5: Timezone-safe date display in download
+                const dateObj = new Date(date + 'T12:00:00');
+                wsData[0].push(
+                    dateObj.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+                    '\n' +
+                    dateObj.toLocaleDateString('en-US', { weekday: 'long' })
+                );
+            }
+
+            const fnRow = ['FN: 11:00 AM to 12:30 PM'];
+            for (const date of selectedDates) {
+                const morningSlot = generatedSchedule.slots.find(s => s.date === date && s.type === 'morning');
+                fnRow.push(morningSlot && morningSlot.courses.length > 0 ? morningSlot.courses.join(', ') : '----');
+            }
+            wsData.push(fnRow);
+
+            const anRow = ['AN: 3:00PM to 4:30PM'];
+            for (const date of selectedDates) {
+                const afternoonSlot = generatedSchedule.slots.find(s => s.date === date && s.type === 'afternoon');
+                anRow.push(afternoonSlot && afternoonSlot.courses.length > 0 ? afternoonSlot.courses.join(', ') : '----');
+            }
+            wsData.push(anRow);
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Timetable');
+            XLSX.writeFile(wb, 'exam_timetable.xlsx');
+            showStatus('✓ Timetable downloaded!', 'success');
+        }
+
+        function downloadEnrollmentCount() {
+            const wb = XLSX.utils.book_new();
+            const wsData = [['Course Code', 'Course Name', 'Count']];
+            const courses = Array.from(allCourses.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+            for (const [code, course] of courses) {
+                wsData.push([code, course.name, course.students.size]);
+            }
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Enrollment Count');
+            XLSX.writeFile(wb, 'enrollment_count.xlsx');
+            showStatus('✓ Enrollment count downloaded!', 'success');
+        }
+
+        window.addEventListener('load', function() {
+            if (typeof XLSX === 'undefined') {
+                showStatus('⚠️ Warning: Excel library failed to load. Please refresh the page or check your internet connection.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
